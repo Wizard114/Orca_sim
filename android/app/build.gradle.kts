@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 // --- [FIM] ---
 
 android {
-    namespace = "com.example.orca_sim"
+    namespace = "com.aegisstudios.orcasim" // <--- ALTERADO AQUI
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -30,8 +30,8 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.orca_sim"
-        minSdk = flutter.minSdkVersion // Definido fixo para garantir compatibilidade
+        applicationId = "com.aegisstudios.orcasim" // <--- ALTERADO AQUI
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -40,7 +40,6 @@ android {
     // --- [INICIO] CONFIGURAÇÃO DE ASSINATURA ---
     signingConfigs {
         create("release") {
-            // Só tenta ler se o arquivo key.properties existir e tiver as chaves
             if (keystoreProperties.isNotEmpty()) {
                 keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
@@ -53,10 +52,8 @@ android {
 
     buildTypes {
         getByName("release") {
-            // Aplica a configuração de assinatura "release" criada acima
             signingConfig = signingConfigs.getByName("release")
             
-            // Otimizações para deixar o app menor e mais difícil de hackear
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

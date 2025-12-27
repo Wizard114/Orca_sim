@@ -1,4 +1,4 @@
-package com.example.orca_sim
+package com.aegisstudios.orcasim
 
 import io.flutter.embedding.android.FlutterActivity
 

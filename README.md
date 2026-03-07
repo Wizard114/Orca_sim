@@ -1,6 +1,32 @@
-# orca_sim
+# Orça Sim
 
-Gerenciador de orçamentos para prestadores de serviço.
+Gerenciador de orçamentos para prestadores de serviço. 
+
+O **Orça Sim** é um aplicativo móvel desenvolvido em Flutter, focado em simplificar a vida de prestadores de serviço e freelancers. Ele atua como um gerenciador de orçamentos prático e rápido, permitindo que o profissional crie, organize e envie orçamentos profissionais em formato PDF diretamente do celular.
+
+---
+
+## ✨ Funcionalidades Principais
+
+* **Autenticação Segura:** Login rápido e seguro utilizando conta Google ou E-mail/Senha.
+* **Perfil da Empresa:** Cadastro dos dados do prestador (logo, nome, contato) para personalização automática dos documentos.
+* **Geração de Orçamentos em PDF:** Criação de orçamentos detalhados, com cálculo automático de valores e layout profissional pronto para envio via WhatsApp ou E-mail.
+* **Gestão de Clientes e Serviços:** Histórico e organização fácil para agilizar a criação de orçamentos recorrentes.
+* **Painel de Controle:** Relatórios e acompanhamento do status financeiro dos orçamentos gerados.
+
+---
+
+## 📖 Manual do Usuário (Como Funciona)
+
+O fluxo do aplicativo foi desenhado para ter o menor atrito possível no dia a dia corrido do prestador de serviço:
+
+1. **Acesso:** Ao abrir o app, o usuário realiza o login (via Google).
+2. **Configuração Inicial:** No primeiro acesso, preenche os dados da sua empresa ou negócio autônomo.
+3. **Novo Orçamento:** Na tela inicial, acessa a criação de um novo documento, preenchendo os dados do cliente, descrição dos serviços e valores.
+4. **Visualização e Envio:** O app gera um PDF (Preview) com os dados estruturados. Com um clique, o usuário pode salvar no dispositivo ou compartilhar diretamente com o cliente.
+5. **Acompanhamento:** Na aba de relatórios, o usuário pode revisar todos os orçamentos emitidos anteriormente.
+
+---
 
 ## 📁 Estrutura de Diretórios
 
@@ -36,6 +62,8 @@ orca_sim/
 └── README.md                 # Documentação do projeto
 ```
 
+---
+
 ## 🔌 Plugins e Dependências
 
 ### Dependências de Produção
@@ -57,6 +85,3 @@ orca_sim/
 - `flutter_lints`: Regras de análise estática recomendadas.
 - `flutter_launcher_icons`: Gerador automático de ícones do app.
 - `flutter_native_splash`: Gerador de tela de abertura nativa.
-
----
-*Este documento foi gerado automaticamente para mapear a extrutura do projeto.*

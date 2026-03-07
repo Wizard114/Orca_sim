@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        // MUDANÇA AQUI: Texto mais curto e fonte ajustada
+        // MUDANÇA AQUI: Texto mais curto e fonte ajustada. Espero que funcione kkkkkk
         title: const Text("Meus Orçamentos",
             style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
         actions: [

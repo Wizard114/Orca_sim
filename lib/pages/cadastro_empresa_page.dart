@@ -172,7 +172,7 @@ class _CadastroEmpresaPageState extends State<CadastroEmpresaPage> {
 
           const SizedBox(height: 8),
 
-          // 2. SAIR SEM SALVAR (Amarelo/Âmbar - Atenção)
+          // 2. SAIR SEM SALVAR SISTEMA ANTI-BURRO (Amarelo/Âmbar - Atenção)
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(

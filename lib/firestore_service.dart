@@ -51,10 +51,8 @@ class FirestoreService {
     User? user = _auth.currentUser;
     if (user == null) return;
 
-    final collection = _db
-        .collection('usuarios')
-        .doc(user.uid)
-        .collection('orcamentos');
+    final collection =
+        _db.collection('usuarios').doc(user.uid).collection('orcamentos');
 
     final dados = {
       'cliente_nome': clienteNome,
@@ -73,7 +71,7 @@ class FirestoreService {
     if (docId != null) {
       await collection.doc(docId).update(dados);
     } else {
-      // Garante que novos tenham status
+      // Garante que novos tenham status, eu não aguento mais pqp
       if (!dados.containsKey('status')) dados['status'] = 'Pendente';
       await collection.add(dados);
     }

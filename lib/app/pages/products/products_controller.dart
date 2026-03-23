@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:orca_sim/domain/entities/item_orcamento.dart';
 import 'package:orca_sim/domain/services/firestore_service.dart';
@@ -7,6 +9,7 @@ class ProductsController {
 
   final IFirestoreService _firestoreService;
   final TextEditingController buscaController = TextEditingController();
+  Timer? _buscaDebounce;
 
   final ValueNotifier<List<Map<String, dynamic>>> produtos =
       ValueNotifier<List<Map<String, dynamic>>>([]);
@@ -19,9 +22,30 @@ class ProductsController {
   }
 
   void dispose() {
+    _buscaDebounce?.cancel();
     buscaController.dispose();
     produtos.dispose();
     carregando.dispose();
+  }
+
+  void buscarComDebounce({
+    required String value,
+    required Future<void> Function({String? query}) onSearch,
+    Duration delay = const Duration(milliseconds: 300),
+  }) {
+    _buscaDebounce?.cancel();
+    _buscaDebounce = Timer(delay, () {
+      final query = normalizarBusca(value);
+      onSearch(query: query.isEmpty ? null : query);
+    });
+  }
+
+  void limparBusca({
+    required Future<void> Function({String? query}) onSearch,
+  }) {
+    _buscaDebounce?.cancel();
+    buscaController.clear();
+    onSearch(query: null);
   }
 
   Future<List<Map<String, dynamic>>> carregarProdutos({String? query}) {

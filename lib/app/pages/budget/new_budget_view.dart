@@ -28,6 +28,7 @@ class _NewBudgetViewState extends State<NewBudgetView> {
   void initState() {
     super.initState();
     _controller.inicializarFormulario(widget.dadosExistentes);
+    _controller.preloadProdutosSugestoes();
   }
 
   @override

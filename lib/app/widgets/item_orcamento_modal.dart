@@ -51,267 +51,257 @@ Future<List<ItemOrcamentoResultado>?> showItemOrcamentoModal({
       ? buscarSugestoesProduto(descController.text)
       : <Map<String, dynamic>>[];
 
-  try {
-    return await showModalBottomSheet<List<ItemOrcamentoResultado>>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setStateModal) {
-          ItemOrcamentoResultado? montarResultado() {
-            final desc = descController.text.trim();
-            final qtd = int.tryParse(qtdController.text) ?? 1;
-            final valor =
-                double.tryParse(valorController.text.replaceAll(',', '.')) ??
-                    0.0;
+  return await showModalBottomSheet<List<ItemOrcamentoResultado>>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+    ),
+    builder: (context) => StatefulBuilder(
+      builder: (context, setStateModal) {
+        ItemOrcamentoResultado? montarResultado() {
+          final desc = descController.text.trim();
+          final qtd = int.tryParse(qtdController.text) ?? 1;
+          final valor =
+              double.tryParse(valorController.text.replaceAll(',', '.')) ?? 0.0;
 
-            if (desc.isEmpty) {
-              return null;
-            }
-
-            return (
-              ItemOrcamento(
-                descricao: desc,
-                quantidade: qtd,
-                unidade: unidadeSelecionada,
-                valorUnitario: valor,
-              ),
-              produtoKeySelecionado,
-            );
+          if (desc.isEmpty) {
+            return null;
           }
 
-          void limparCamposParaProximoItem() {
-            setStateModal(() {
-              descController.clear();
-              qtdController.text = '1';
-              valorController.text = '0.00';
-              unidadeSelecionada = 'un';
-              produtoKeySelecionado = null;
-              sugestoes = const [];
-            });
-          }
-
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 15,
+          return (
+            ItemOrcamento(
+              descricao: desc,
+              quantidade: qtd,
+              unidade: unidadeSelecionada,
+              valorUnitario: valor,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[600],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  itemAtual != null ? 'Editar Item' : 'Adicionar Item',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: descController,
-                  decoration:
-                      inputDecorationBuilder('Descrição', Icons.description),
-                  autofocus: true,
-                  textCapitalization: TextCapitalization.sentences,
-                  onChanged: (value) {
-                    if (!enableSuggestions) {
-                      return;
-                    }
-                    setStateModal(() {
-                      produtoKeySelecionado = null;
-                      sugestoes = buscarSugestoesProduto(value);
-                    });
-                  },
-                ),
-                enableSuggestions && sugestoes.isNotEmpty
-                    ? ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 180),
-                        child: Card(
-                          margin: const EdgeInsets.only(top: 8, bottom: 8),
-                          color:
-                              isDark ? const Color(0xFF2C2C2C) : Colors.white,
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                            physics: const ClampingScrollPhysics(),
-                            itemCount: sugestoes.length,
-                            padding: EdgeInsets.zero,
-                            separatorBuilder: (_, __) =>
-                                const Divider(height: 1),
-                            itemBuilder: (context, sugIndex) {
-                              final produto = sugestoes[sugIndex];
-                              final nome = (produto['nome'] ?? '').toString();
-                              final unidade =
-                                  (produto['unidade'] ?? 'un').toString();
-                              final preco = obterPrecoProduto(produto);
-                              return ListTile(
-                                dense: true,
-                                title: Text(nome),
-                                subtitle: Text(
-                                  'Unidade: $unidade',
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                trailing: Text(
-                                  NumberFormat.currency(
-                                    locale: 'pt_BR',
-                                    symbol: 'R\$',
-                                  ).format(preco),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                                onTap: () {
-                                  setStateModal(() {
-                                    descController.text = nome;
-                                    unidadeSelecionada =
-                                        unidades.contains(unidade)
-                                            ? unidade
-                                            : 'un';
-                                    valorController.text =
-                                        preco.toStringAsFixed(2);
-                                    produtoKeySelecionado =
-                                        produto['nome_normalizado']?.toString();
-                                    sugestoes = const [];
-                                  });
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      )
-                    : const SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: qtdController,
-                        keyboardType: TextInputType.number,
-                        decoration:
-                            inputDecorationBuilder('Qtd', Icons.numbers),
-                        onTap: () {
-                          qtdController.selection = TextSelection(
-                            baseOffset: 0,
-                            extentOffset: qtdController.text.length,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        initialValue: unidadeSelecionada,
-                        decoration: inputDecorationBuilder('Un.', Icons.scale),
-                        dropdownColor:
-                            isDark ? const Color(0xFF2C2C2C) : Colors.white,
-                        items: unidades
-                            .map(
-                              (u) => DropdownMenuItem(value: u, child: Text(u)),
-                            )
-                            .toList(),
-                        onChanged: (v) =>
-                            setStateModal(() => unidadeSelecionada = v ?? 'un'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: valorController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration:
-                      inputDecorationBuilder('Valor (R\$)', Icons.attach_money),
-                  onTap: () {
-                    valorController.selection = TextSelection(
-                      baseOffset: 0,
-                      extentOffset: valorController.text.length,
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                itemAtual != null
-                    ? SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            final resultado = montarResultado();
-                            if (resultado == null) {
-                              return;
-                            }
-                            Navigator.pop(context, [resultado]);
-                          },
-                          icon: const Icon(Icons.check),
-                          label: const Text('Salvar Item'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: destaqueColor,
-                            foregroundColor: actionForegroundColor,
-                          ),
-                        ),
-                      )
-                    : Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () =>
-                                  Navigator.pop(context, itensAdicionados),
-                              child: const Text('Finalizar'),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: SizedBox(
-                              height: 52,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  final resultado = montarResultado();
-                                  if (resultado == null) {
-                                    return;
-                                  }
+            produtoKeySelecionado,
+          );
+        }
 
-                                  itensAdicionados.add(resultado);
-                                  limparCamposParaProximoItem();
-                                },
-                                icon: const Icon(Icons.add),
-                                label: const Text('Adicionar Item'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: destaqueColor,
-                                  foregroundColor: actionForegroundColor,
+        void limparCamposParaProximoItem() {
+          setStateModal(() {
+            descController.clear();
+            qtdController.text = '1';
+            valorController.text = '0.00';
+            unidadeSelecionada = 'un';
+            produtoKeySelecionado = null;
+            sugestoes = const [];
+          });
+        }
+
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 20,
+            right: 20,
+            top: 15,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[600],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                itemAtual != null ? 'Editar Item' : 'Adicionar Item',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descController,
+                decoration:
+                    inputDecorationBuilder('Descrição', Icons.description),
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                onChanged: (value) {
+                  if (!enableSuggestions) {
+                    return;
+                  }
+                  setStateModal(() {
+                    produtoKeySelecionado = null;
+                    sugestoes = buscarSugestoesProduto(value);
+                  });
+                },
+              ),
+              enableSuggestions && sugestoes.isNotEmpty
+                  ? ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 180),
+                      child: Card(
+                        margin: const EdgeInsets.only(top: 8, bottom: 8),
+                        color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const ClampingScrollPhysics(),
+                          itemCount: sugestoes.length,
+                          padding: EdgeInsets.zero,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (context, sugIndex) {
+                            final produto = sugestoes[sugIndex];
+                            final nome = (produto['nome'] ?? '').toString();
+                            final unidade =
+                                (produto['unidade'] ?? 'un').toString();
+                            final preco = obterPrecoProduto(produto);
+                            return ListTile(
+                              dense: true,
+                              title: Text(nome),
+                              subtitle: Text(
+                                'Unidade: $unidade',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              trailing: Text(
+                                NumberFormat.currency(
+                                  locale: 'pt_BR',
+                                  symbol: 'R\$',
+                                ).format(preco),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
                                 ),
+                              ),
+                              onTap: () {
+                                setStateModal(() {
+                                  descController.text = nome;
+                                  unidadeSelecionada =
+                                      unidades.contains(unidade)
+                                          ? unidade
+                                          : 'un';
+                                  valorController.text =
+                                      preco.toStringAsFixed(2);
+                                  produtoKeySelecionado =
+                                      produto['nome_normalizado']?.toString();
+                                  sugestoes = const [];
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    )
+                  : const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: qtdController,
+                      keyboardType: TextInputType.number,
+                      decoration: inputDecorationBuilder('Qtd', Icons.numbers),
+                      onTap: () {
+                        qtdController.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: qtdController.text.length,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: unidadeSelecionada,
+                      decoration: inputDecorationBuilder('Un.', Icons.scale),
+                      dropdownColor:
+                          isDark ? const Color(0xFF2C2C2C) : Colors.white,
+                      items: unidades
+                          .map(
+                            (u) => DropdownMenuItem(value: u, child: Text(u)),
+                          )
+                          .toList(),
+                      onChanged: (v) =>
+                          setStateModal(() => unidadeSelecionada = v ?? 'un'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: valorController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration:
+                    inputDecorationBuilder('Valor (R\$)', Icons.attach_money),
+                onTap: () {
+                  valorController.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: valorController.text.length,
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              itemAtual != null
+                  ? SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          final resultado = montarResultado();
+                          if (resultado == null) {
+                            return;
+                          }
+                          Navigator.pop(context, [resultado]);
+                        },
+                        icon: const Icon(Icons.check),
+                        label: const Text('Salvar Item'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: destaqueColor,
+                          foregroundColor: actionForegroundColor,
+                        ),
+                      ),
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () =>
+                                Navigator.pop(context, itensAdicionados),
+                            child: const Text('Finalizar'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: SizedBox(
+                            height: 52,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                final resultado = montarResultado();
+                                if (resultado == null) {
+                                  return;
+                                }
+
+                                itensAdicionados.add(resultado);
+                                limparCamposParaProximoItem();
+                              },
+                              icon: const Icon(Icons.add),
+                              label: const Text('Adicionar Item'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: destaqueColor,
+                                foregroundColor: actionForegroundColor,
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  } finally {
-    descController.dispose();
-    qtdController.dispose();
-    valorController.dispose();
-  }
+                        ),
+                      ],
+                    ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    ),
+  );
 }

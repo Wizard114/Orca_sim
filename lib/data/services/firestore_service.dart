@@ -10,6 +10,9 @@ class FirestoreService implements IFirestoreService {
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
   final Map<String, Map<String, dynamic>> _produtosCache = {};
+  String? _cachedUid;
+  String? _cachedCnpjNormalizado;
+  static const _maxOrcamentosNoStream = 120;
 
   static const _acentos = {
     'a': 'a',
@@ -90,12 +93,20 @@ class FirestoreService implements IFirestoreService {
   Future<String?> _resolverCnpjNormalizado() async {
     final user = _auth.currentUser;
     if (user == null) {
+      _cachedUid = null;
+      _cachedCnpjNormalizado = null;
       return null;
+    }
+
+    if (_cachedUid == user.uid && _cachedCnpjNormalizado != null) {
+      return _cachedCnpjNormalizado;
     }
 
     final userRef = _db.collection('usuarios').doc(user.uid);
     final userDoc = await userRef.get();
     if (!userDoc.exists) {
+      _cachedUid = user.uid;
+      _cachedCnpjNormalizado = null;
       return null;
     }
 
@@ -107,6 +118,8 @@ class FirestoreService implements IFirestoreService {
     final fromNormalized = (data['cnpj_normalizado'] ?? '').toString();
     final normalized = _normalizarCnpj(fromNormalized);
     if (normalized.length == 14) {
+      _cachedUid = user.uid;
+      _cachedCnpjNormalizado = normalized;
       return normalized;
     }
 
@@ -119,8 +132,13 @@ class FirestoreService implements IFirestoreService {
         },
         SetOptions(merge: true),
       );
+      _cachedUid = user.uid;
+      _cachedCnpjNormalizado = normalizedFromCnpj;
       return normalizedFromCnpj;
     }
+
+    _cachedUid = user.uid;
+    _cachedCnpjNormalizado = null;
 
     return null;
   }
@@ -294,6 +312,7 @@ class FirestoreService implements IFirestoreService {
       return ref
           .where('data', isGreaterThanOrEqualTo: dataLimite)
           .orderBy('data', descending: true)
+          .limit(_maxOrcamentosNoStream)
           .snapshots();
     });
   }
@@ -382,6 +401,11 @@ class FirestoreService implements IFirestoreService {
   Future<List<Map<String, dynamic>>> listarProdutosEmpresa({
     String? query,
   }) async {
+    // Reuse local cache for query updates and frequent search input changes.
+    if (_produtosCache.isNotEmpty) {
+      return topProdutosEmpresa(query: query, limit: 10000);
+    }
+
     final produtosRef = await _colecaoProdutosEmpresa();
     if (produtosRef == null) {
       _produtosCache.clear();
@@ -442,7 +466,21 @@ class FirestoreService implements IFirestoreService {
       SetOptions(merge: true),
     );
 
-    await preloadProdutosEmpresa();
+    final existente = _produtosCache[keyFinal] ?? <String, dynamic>{};
+    _produtosCache[keyFinal] = {
+      ...existente,
+      'nome': nomeLimpo,
+      'nome_normalizado': keyFinal,
+      'unidade': unidade,
+      'preco_centavos': precoCentavos,
+      'preco': preco,
+      'usage_count': _usageCountFrom(existente),
+      'updated_at': DateTime.now(),
+      'created_at': existente['created_at'] is DateTime ||
+              existente['created_at'] is Timestamp
+          ? existente['created_at']
+          : DateTime.now(),
+    };
   }
 
   @override
@@ -514,8 +552,22 @@ class FirestoreService implements IFirestoreService {
           'updated_at': FieldValue.serverTimestamp(),
         });
       });
-    }
 
-    await preloadProdutosEmpresa();
+      final existente = _produtosCache[nomeNormalizado] ?? <String, dynamic>{};
+      _produtosCache[nomeNormalizado] = {
+        ...existente,
+        'nome': nome,
+        'nome_normalizado': nomeNormalizado,
+        'unidade': unidade,
+        'preco_centavos': precoCentavos,
+        'preco': valor,
+        'usage_count': _usageCountFrom(existente) + 1,
+        'updated_at': DateTime.now(),
+        'created_at': existente['created_at'] is DateTime ||
+                existente['created_at'] is Timestamp
+            ? existente['created_at']
+            : DateTime.now(),
+      };
+    }
   }
 }

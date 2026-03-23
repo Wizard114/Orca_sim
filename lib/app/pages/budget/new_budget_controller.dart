@@ -48,6 +48,10 @@ class NewBudgetController {
     produtoKeys.value = data.produtoKeys;
   }
 
+  Future<void> preloadProdutosSugestoes() {
+    return _firestoreService.preloadProdutosEmpresa();
+  }
+
   void dispose() {
     clienteNomeController.dispose();
     clienteCpfCnpjController.dispose();

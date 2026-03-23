@@ -28,11 +28,6 @@ class _SplashViewState extends State<SplashView>
       return;
     }
 
-    await _controller.preloadWorkspaceData();
-    if (!mounted) {
-      return;
-    }
-
     final destino = _controller.rotaDestino(
       autenticado: _controller.isAuthenticated,
     );

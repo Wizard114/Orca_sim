@@ -207,7 +207,6 @@ void _injectControllers() {
         getIt<RegisterUseCase>(),
         getIt<RecoverPasswordUseCase>(),
         getIt<SignInWithGoogleUseCase>(),
-        getIt<IFirestoreService>(),
       ),
     );
   }
@@ -216,7 +215,6 @@ void _injectControllers() {
     getIt.registerFactory<SplashController>(
       () => SplashController(
         getIt<GetCurrentUserUseCase>(),
-        getIt<IFirestoreService>(),
       ),
     );
   }

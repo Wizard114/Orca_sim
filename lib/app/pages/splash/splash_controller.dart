@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:orca_sim/domain/services/firestore_service.dart';
 import 'package:orca_sim/domain/usecases/auth/get_current_user_usecase.dart';
 
 class SplashController {
-  SplashController(this._getCurrentUserUseCase, this._firestoreService);
+  SplashController(this._getCurrentUserUseCase);
 
   final GetCurrentUserUseCase _getCurrentUserUseCase;
-  final IFirestoreService _firestoreService;
 
   late AnimationController animationController;
   late Animation<double> scaleAnimation;
@@ -29,12 +27,5 @@ class SplashController {
 
   String rotaDestino({required bool autenticado}) {
     return autenticado ? '/home' : '/login';
-  }
-
-  Future<void> preloadWorkspaceData() async {
-    if (!isAuthenticated) {
-      return;
-    }
-    await _firestoreService.preloadProdutosEmpresa();
   }
 }

@@ -239,14 +239,15 @@ class _ProductsViewState extends State<ProductsView> {
                         : IconButton(
                             icon: const Icon(Icons.clear),
                             onPressed: () {
-                              _controller.buscaController.clear();
-                              _carregarProdutos();
+                              _controller.limparBusca(
+                                  onSearch: _carregarProdutos,);
                             },
                           ),
                   ),
                   onChanged: (value) {
-                    _carregarProdutos(
-                      query: _controller.normalizarBusca(value),
+                    _controller.buscarComDebounce(
+                      value: value,
+                      onSearch: _carregarProdutos,
                     );
                   },
                 ),

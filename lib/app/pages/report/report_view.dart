@@ -322,7 +322,7 @@ class _ReportViewState extends State<ReportView> {
             .toUpperCase();
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Relatorios Financeiros')),
+          appBar: AppBar(title: const Text('Relatórios Financeiros')),
           body: Column(
             children: [
               _buildMesSelector(

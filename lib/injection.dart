@@ -69,11 +69,6 @@ void _injectServices() {
       ),
     );
   }
-  if (!getIt.isRegistered<IAuthService>()) {
-    getIt.registerLazySingleton<IAuthService>(
-      () => AuthService(),
-    );
-  }
 
   if (!getIt.isRegistered<IFirestoreService>()) {
     getIt.registerLazySingleton<IFirestoreService>(() => FirestoreService());

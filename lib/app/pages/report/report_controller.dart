@@ -50,7 +50,7 @@ class ReportController {
     const meses = [
       'Janeiro',
       'Fevereiro',
-      'Marco',
+      'Março',
       'Abril',
       'Maio',
       'Junho',

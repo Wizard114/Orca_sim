@@ -125,7 +125,7 @@ class _HomeViewState extends State<HomeView> {
           ListTile(
             leading: Icon(Icons.analytics_outlined, color: colorGreen),
             title: Text(
-              'Relatorios Financeiros',
+              'Relatórios Financeiros',
               style: TextStyle(color: colorTextPrimary),
             ),
             onTap: () {

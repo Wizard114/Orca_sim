@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +19,31 @@ void main() async {
   runApp(const OrcaSimApp());
 }
 
-class OrcaSimApp extends StatelessWidget {
+class OrcaSimApp extends StatefulWidget {
   const OrcaSimApp({super.key});
+
+  @override
+  State<OrcaSimApp> createState() => _OrcaSimAppState();
+}
+
+class _OrcaSimAppState extends State<OrcaSimApp> {
+  StreamSubscription<User?>? _authSubscription;
+  String? _temaCarregadoUid;
+
+  @override
+  void initState() {
+    super.initState();
+    _onAuthChanged(FirebaseAuth.instance.currentUser);
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen(
+          _onAuthChanged,
+        );
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
 
   ThemeMode _themeModeFromTemaApp(String? tema) {
     switch (tema) {
@@ -31,20 +56,31 @@ class OrcaSimApp extends StatelessWidget {
     }
   }
 
-  Future<void> _carregarTemaUsuario(User? user) async {
-    if (user != null) {
-      final dados = await getIt<IFirestoreService>().pegarDadosEmpresa();
-      if (dados != null && dados.containsKey('tema_app')) {
-        themeNotifier.value =
-            _themeModeFromTemaApp(dados['tema_app']?.toString());
-      }
+  Future<void> _onAuthChanged(User? user) async {
+    if (user == null) {
+      _temaCarregadoUid = null;
+      themeNotifier.value = ThemeMode.system;
+      return;
+    }
+
+    if (_temaCarregadoUid == user.uid) {
+      return;
+    }
+
+    _temaCarregadoUid = user.uid;
+    final dados = await getIt<IFirestoreService>().pegarDadosEmpresa();
+    if (!mounted || _temaCarregadoUid != user.uid) {
+      return;
+    }
+
+    if (dados != null && dados.containsKey('tema_app')) {
+      themeNotifier.value =
+          _themeModeFromTemaApp(dados['tema_app']?.toString());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    _carregarTemaUsuario(FirebaseAuth.instance.currentUser);
-
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,
       builder: (_, mode, __) {

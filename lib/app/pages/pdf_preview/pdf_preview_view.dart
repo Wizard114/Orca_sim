@@ -6,7 +6,7 @@ import 'package:orca_sim/injection.dart';
 import 'package:printing/printing.dart';
 
 class PdfPreviewView extends StatelessWidget {
-  const PdfPreviewView({
+  PdfPreviewView({
     super.key,
     required this.pdfBytes,
     required this.nomeArquivo,
@@ -14,11 +14,10 @@ class PdfPreviewView extends StatelessWidget {
 
   final Uint8List pdfBytes;
   final String nomeArquivo;
+  final controller = getIt<PdfPreviewController>();
 
   @override
   Widget build(BuildContext context) {
-    final controller = getIt<PdfPreviewController>();
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {

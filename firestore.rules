@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function userDocPath() {
+      return /databases/$(database)/documents/usuarios/$(request.auth.uid);
+    }
+
+    function hasUserDoc() {
+      return isSignedIn() && exists(userDocPath());
+    }
+
+    function userCompanyId() {
+      return hasUserDoc() ? get(userDocPath()).data.cnpj_normalizado : null;
+    }
+
+    function isUserCompany(cnpjId) {
+      return hasUserDoc() && userCompanyId() == cnpjId;
+    }
+
+    function isValidCompanyDoc(cnpjId) {
+      return request.resource.data.cnpj_normalizado == cnpjId
+        && request.resource.data.cnpj_normalizado is string
+        && request.resource.data.cnpj_normalizado.size() == 14;
+    }
+
+    function isValidProductDoc(produtoId) {
+      return request.resource.data.nome_normalizado == produtoId
+        && request.resource.data.usage_count is int
+        && request.resource.data.usage_count >= 0
+        && request.resource.data.preco_centavos is int
+        && request.resource.data.preco_centavos >= 0;
+    }
+
+    match /usuarios/{uid} {
+      allow read, write: if isOwnUser(uid);
+
+      // BEGIN legacy-v1-compat (remove after v1.0.0 sunset + backfill validation)
+      // Supports old app versions that still use user-scoped budgets.
+      match /orcamentos/{orcamentoId} {
+        allow read, create, update, delete: if isOwnUser(uid);
+      }
+      // END legacy-v1-compat
+    }
+
+    match /empresas/{cnpjId} {
+      allow read: if isUserCompany(cnpjId);
+      allow create, update: if isUserCompany(cnpjId) && isValidCompanyDoc(cnpjId);
+      allow delete: if false;
+
+      match /orcamentos/{orcamentoId} {
+        allow read, create, update, delete: if isUserCompany(cnpjId);
+      }
+
+      match /produtos/{produtoId} {
+        allow read: if isUserCompany(cnpjId);
+        allow create, update: if isUserCompany(cnpjId) && isValidProductDoc(produtoId);
+        allow delete: if isUserCompany(cnpjId);
+      }
+    }
+  }
+}

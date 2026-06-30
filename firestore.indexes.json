@@ -1,0 +1,33 @@
+{
+    "indexes": [
+        {
+            "collectionGroup": "orcamentos",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "status",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "data",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "produtos",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "usage_count",
+                    "order": "DESCENDING"
+                },
+                {
+                    "fieldPath": "updated_at",
+                    "order": "DESCENDING"
+                }
+            ]
+        }
+    ],
+    "fieldOverrides": []
+}
